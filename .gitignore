@@ -1,0 +1,7 @@
+.streamlit/secrets.toml
+venv/
+__pycache__/.txt
+.streamlit/secrets.toml
+.txt
+__pycache__/
+*.pyc
