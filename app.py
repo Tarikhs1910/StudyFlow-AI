@@ -128,7 +128,46 @@ def set_background(image_path):
             border-radius: 12px;
         }}
 
+        /* FIX TEXT VISIBILITY */
+.stApp,
+.block-container,
+[data-testid="stSidebar"] {
+    color: #222222 !important;
+}
 
+h1, h2, h3, h4, h5, h6,
+p,
+[data-testid="stMarkdownContainer"],
+[data-testid="stWidgetLabel"],
+[data-testid="stWidgetLabel"] * {
+    color: #222222 !important;
+}
+
+div[data-baseweb="input"] input,
+div[data-baseweb="textarea"] textarea {
+    color: #222222 !important;
+    background-color: #ffffff !important;
+}
+
+div[data-baseweb="select"] {
+    background-color: #ffffff !important;
+}
+
+div[data-baseweb="select"] * {
+    color: #222222 !important;
+}
+
+[data-testid="stFileUploader"] * {
+    color: #222222 !important;
+}
+
+[data-testid="stChatInput"] * {
+    color: #222222 !important;
+}
+
+[data-testid="stAlert"] * {
+    color: #222222 !important;
+}
         </style>
         """,
         unsafe_allow_html=True
