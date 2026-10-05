@@ -4,11 +4,6 @@ from google.genai import types
 from datetime import date
 import json
 
-
-# =========================================================
-# PAGE SETUP
-# =========================================================
-
 st.set_page_config(
     page_title="StudyFlow AI",
     page_icon="📅",
@@ -17,11 +12,6 @@ st.set_page_config(
 
 st.title("📅 StudyFlow AI")
 st.caption("AI Academic Deadline & Study Planner")
-
-
-# =========================================================
-# GEMINI SETUP
-# =========================================================
 
 if "GEMINI_API_KEY" not in st.secrets:
     st.error("Gemini API key is missing from Streamlit secrets.")
@@ -36,9 +26,7 @@ def get_gemini_client():
     )
 
 
-# =========================================================
-# SESSION STATE
-# =========================================================
+# ---------------- SESSION STATE ----------------
 
 if "profile" not in st.session_state:
     st.session_state.profile = None
@@ -55,10 +43,11 @@ if "input_mode" not in st.session_state:
 if "extracted_items" not in st.session_state:
     st.session_state.extracted_items = []
 
+if "weekly_plan" not in st.session_state:
+    st.session_state.weekly_plan = ""
 
-# =========================================================
-# STUDENT PROFILE
-# =========================================================
+
+# ---------------- STUDENT PROFILE ----------------
 
 if st.session_state.profile is None:
 
@@ -77,13 +66,10 @@ if st.session_state.profile is None:
     )
 
     if institution == "School":
-
         standard = st.text_input("Class / Standard")
         semester = ""
         course = ""
-
     else:
-
         standard = ""
         semester = st.text_input("Semester")
         course = st.text_input("Course / Branch")
@@ -130,9 +116,7 @@ if st.session_state.profile is None:
         st.rerun()
 
 
-# =========================================================
-# MAIN APPLICATION
-# =========================================================
+# ---------------- MAIN APP ----------------
 
 else:
 
@@ -142,9 +126,7 @@ else:
         f"Welcome, {profile['name']}! 👋"
     )
 
-    # =====================================================
-    # SIDEBAR
-    # =====================================================
+    # ---------------- SIDEBAR ----------------
 
     with st.sidebar:
 
@@ -199,12 +181,11 @@ else:
             st.session_state.messages = []
             st.session_state.input_mode = None
             st.session_state.extracted_items = []
+            st.session_state.weekly_plan = []
 
             st.rerun()
 
-    # =====================================================
-    # ADD ACADEMIC INFORMATION
-    # =====================================================
+    # ---------------- ADD ACADEMIC INFORMATION ----------------
 
     st.header("➕ Add Academic Information")
 
@@ -231,9 +212,7 @@ else:
         ):
             st.session_state.input_mode = "manual"
 
-    # =====================================================
-    # IMAGE INPUT
-    # =====================================================
+    # ---------------- IMAGE INPUT ----------------
 
     if st.session_state.input_mode == "image":
 
@@ -404,6 +383,7 @@ Rules:
                         st.session_state.extracted_items = valid_items
 
                         if not valid_items:
+
                             st.warning(
                                 "No clearly dated academic events "
                                 "were found in the image."
@@ -417,9 +397,7 @@ Rules:
 
                         st.code(str(e))
 
-        # =================================================
-        # REVIEW EXTRACTED EVENTS
-        # =================================================
+        # ---------------- REVIEW EXTRACTED EVENTS ----------------
 
         if st.session_state.extracted_items:
 
@@ -482,9 +460,7 @@ Rules:
 
                 st.rerun()
 
-    # =====================================================
-    # MANUAL INPUT
-    # =====================================================
+    # ---------------- MANUAL INPUT ----------------
 
     if st.session_state.input_mode == "manual":
 
@@ -555,9 +531,7 @@ Rules:
                     "Task added to your planner!"
                 )
 
-    # =====================================================
-    # CALENDAR
-    # =====================================================
+    # ---------------- CALENDAR ----------------
 
     st.divider()
 
@@ -617,9 +591,7 @@ Rules:
             "Add a task or deadline to see it on your calendar."
         )
 
-    # =====================================================
-    # UPCOMING EVENTS
-    # =====================================================
+    # ---------------- UPCOMING EVENTS ----------------
 
     st.divider()
 
@@ -682,9 +654,114 @@ Rules:
             "No upcoming events yet."
         )
 
-    # =====================================================
-    # SAVED INFORMATION
-    # =====================================================
+    # ---------------- AI WEEKLY STUDY PLAN ----------------
+
+    st.divider()
+
+    st.header("🗓️ AI Weekly Study Plan")
+
+    st.write(
+        "Let StudyFlow AI create a personalized study plan "
+        "based on your upcoming deadlines."
+    )
+
+    if st.session_state.deadlines:
+
+        if st.button(
+            "🤖 Generate My Weekly Study Plan",
+            type="primary",
+            use_container_width=True
+        ):
+
+            deadline_context = json.dumps(
+                st.session_state.deadlines,
+                indent=2
+            )
+
+            weekly_prompt = f"""
+You are StudyFlow AI, an academic study planner.
+
+Student profile:
+{json.dumps(profile, indent=2)}
+
+Current academic deadlines and tasks:
+{deadline_context}
+
+Create a practical study plan for the next 7 days.
+
+Rules:
+- Prioritize exams and high-priority deadlines.
+- Consider the student's academic goal.
+- Do not invent subjects, deadlines, or tasks.
+- Use only the information provided.
+- Spread work realistically across the week.
+- Include revision before exams when possible.
+- Keep the plan concise and easy to follow.
+- Clearly organize the plan by day.
+- Mention the specific task or deadline being prepared for.
+- If there are very few tasks, suggest reasonable study/revision
+  sessions based only on the available academic information.
+
+Return a simple readable plan using this format:
+
+MONDAY
+- Task:
+- Study focus:
+
+TUESDAY
+- Task:
+- Study focus:
+
+Continue through SUNDAY.
+"""
+
+            with st.spinner(
+                "AI is creating your personalized weekly plan..."
+            ):
+
+                try:
+
+                    client = get_gemini_client()
+
+                    response = client.models.generate_content(
+                        model=MODEL_NAME,
+                        contents=weekly_prompt
+                    )
+
+                    st.session_state.weekly_plan = response.text
+
+                except Exception as e:
+
+                    st.error(
+                        "Could not generate the weekly study plan."
+                    )
+
+                    st.code(str(e))
+
+        if st.session_state.weekly_plan:
+
+            st.subheader("📚 Your Personalized 7-Day Plan")
+
+            st.markdown(
+                st.session_state.weekly_plan
+            )
+
+            if st.button(
+                "🔄 Generate New Plan"
+            ):
+
+                st.session_state.weekly_plan = ""
+
+                st.rerun()
+
+    else:
+
+        st.info(
+            "Add at least one academic task or deadline "
+            "to generate your weekly study plan."
+        )
+
+    # ---------------- ALL ACADEMIC INFORMATION ----------------
 
     st.divider()
 
@@ -745,9 +822,7 @@ Rules:
                     f"{item.get('source', 'Unknown')}"
                 )
 
-    # =====================================================
-    # AI CHAT
-    # =====================================================
+    # ---------------- AI CHAT ----------------
 
     st.divider()
 
