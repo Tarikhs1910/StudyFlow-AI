@@ -9,7 +9,6 @@ def set_background(image_path):
         f"""
         <style>
 
-        /* Full page background */
         .stApp {{
             background-image:
                 linear-gradient(
@@ -24,7 +23,6 @@ def set_background(image_path):
             background-repeat: no-repeat;
         }}
 
-        /* Remove the large white box */
         .block-container {{
             background: transparent !important;
             padding-top: 2rem;
@@ -32,12 +30,10 @@ def set_background(image_path):
             padding-right: 2rem;
         }}
 
-        /* Sidebar */
         [data-testid="stSidebar"] {{
             background: rgba(255, 255, 255, 0.75) !important;
         }}
 
-        /* Input sections */
         .stTextInput,
         .stSelectbox,
         .stDateInput,
@@ -47,7 +43,6 @@ def set_background(image_path):
             border-radius: 12px;
         }}
 
-        /* Make normal text clearly visible */
         .stApp p,
         .stApp label,
         .stApp span,
@@ -55,7 +50,6 @@ def set_background(image_path):
             color: #222222 !important;
         }}
 
-        /* Headings */
         .stApp h1,
         .stApp h2,
         .stApp h3,
@@ -63,19 +57,16 @@ def set_background(image_path):
             color: #111111 !important;
         }}
 
-        /* Buttons */
         .stButton button {{
             color: #111111 !important;
         }}
 
-        /* Text input */
         .stTextInput input,
         .stTextArea textarea {{
             color: #222222 !important;
             background-color: rgba(255, 255, 255, 0.85) !important;
         }}
 
-        /* Select boxes */
         .stSelectbox div[data-baseweb="select"] {{
             color: #222222 !important;
             background-color: rgba(255, 255, 255, 0.85) !important;
